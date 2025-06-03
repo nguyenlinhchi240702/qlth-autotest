@@ -16,7 +16,7 @@ func TestGetAbsentRequestHistory(t *testing.T) {
 	//loginResp: là struct hoặc đối tượng chứa dữ liệu trả về sau khi đăng nhập thành công
 	//err — giá trị lỗi (nếu có) trong quá trình gọi hàm (ví dụ lỗi mạng, sai mật khẩu, lỗi phân tích dữ liệu phản hồi...)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, loginResp.AccessToken, "AccessToken không được để trống")
+	assert.NotEmpty(t, loginResp.AccessToken, "AccessToken không được để trốngg")
 
 	t.Logf("Token nhận được: %s", loginResp.AccessToken)
 
