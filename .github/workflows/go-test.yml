@@ -21,3 +21,17 @@ jobs:
 
       - name: Run Tests
         run: go test -v ./...
+
+      - name: Notify Telegram if Success
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="✅ Go tests PASSED on [${{ github.repository }}] commit: ${{ github.sha }}"
+
+      - name: Notify Telegram if Failed
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+          -d text="❌ Go tests FAILED on [${{ github.repository }}] commit: ${{ github.sha }}"
