@@ -19,19 +19,21 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Run Tests
-        run: go test -v ./...
-
-      - name: Notify Telegram if Success
-        if: success()
+      - name: Run Go Tests and Save Output
         run: |
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
-          -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="✅ Go tests PASSED on [${{ github.repository }}] commit: ${{ github.sha }}"
+          go test -v ./... | tee test-result.log
+        continue-on-error: true
 
-      - name: Notify Telegram if Failed
+      - name: Upload test logs (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: test-result.log
+
+      - name: Send Telegram Notification if Test Failed
         if: failure()
         run: |
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+          LOG=$(tail -n 20 test-result.log | sed 's/$/%0A/' | tr -d '\n')
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -d text="❌ Go tests FAILED on [${{ github.repository }}] commit: ${{ github.sha }}"
+          -d text="❌ Go tests FAILED on [${{ github.repository }}] commit: ${{ github.sha }}%0A%0A🔍 Log (cuối):%0A$LOG%0A%0A🔗 https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
